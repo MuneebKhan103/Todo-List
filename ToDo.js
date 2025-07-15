@@ -1,9 +1,20 @@
 var taskToBeAdd = JSON.parse(localStorage.getItem("todos")) || [];
-    
+let editingIndex = null;    
 const display = () => {
   let text = "";
   taskToBeAdd.forEach((item, index) => {
   const doneClass = item.done ? "done" : "";
+  if (editingIndex === index) [
+    text += `
+    <div class="first ${doneClass}"> 
+    <input type="input" id="editInput${editingIndex}" class="editField"  value="${item.task}" />
+      <div class="saveAndCancel">
+        <button id = "saveBtn" onclick="saveEdit()">Save</button>
+        <button id= "cancel" onclick="cancelEdit()">Cancel</button>
+    </div>
+    </div>`
+  ]
+  else{
   text += `
     <div class="first ${doneClass}">
       <div class="editArea">${item.task}</div>
@@ -19,7 +30,7 @@ const display = () => {
         </button>
         </div>
     </div>
-  `;
+  `;}
 });
 document.getElementById("myLists").innerHTML = text;
 };
@@ -49,27 +60,29 @@ const doneTick = (index) => {
   display();
 };
 const editItem = (index) => {
-  const taskDiv = document.getElementsByClassName("first")[index];
-  const currentValue = taskToBeAdd[index];
-taskDiv.innerHTML = `
-  <input type="text" class="editField" id="editInput${index}" value="${currentValue.task}" />
-    <div class="saveAndCancel">
-      <button id = "saveBtn" onclick="saveEdit()">Save</button>
-      <button id= "cancel" onclick="display()">Cancel</button>
-    </div>
-  `;
+  editingIndex = index;
+  display();
 };
+
 const saveEdit = () => {
-  const editInput = Array.from(document.querySelectorAll(".editField"));
-  editInput.forEach((input, i) => {
+  const input = document.getElementById(`editInput${editingIndex}`);
+  if (!input) return;
     const updatedValue = input.value.trim();
-    if(updatedValue !== ""){
-      taskToBeAdd[i].task = updatedValue;
-    }
-  })
+    if (updatedValue === ""){
+      alert("You must write something!");
+    return;
+  }
+taskToBeAdd[editingIndex].task = updatedValue;
+editingIndex = null;
 saveToLocal();
 display();
 };
+
+const cancelEdit = () => {
+  editingIndex = null;
+  display();
+}
+
 const saveToLocal = () => {
 localStorage.setItem("todos", JSON.stringify(taskToBeAdd));
 };
